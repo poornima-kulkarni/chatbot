@@ -114,7 +114,7 @@ def clear_chat_history():
 
 # Main layout
 with st.container():
-    col1, col2 = st.columns([6, 2])  # Wider main chat area
+    col1, col2 = st.columns([6, 2])
 
     with col2:
         st.markdown("### 📊 Chat Controls")
@@ -155,10 +155,10 @@ with st.container():
                 import re
                 return re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
 
-            # Convert markdown **bold** to <b>bold</b>
+            
             processed_text = markdown_to_html_bold(chat_text)
 
-            # Build story with color and bold rendering
+            
             story = []
             for line in processed_text.split('\n'):
                 if line.strip():
@@ -205,7 +205,7 @@ with st.container():
 
     with col1:
         st.markdown(f"<div class='h4'><b>Type your prompt here:</b></div>", unsafe_allow_html=True)
-        # Chat input
+        # input
         user_input = st.chat_input("Type your message here... (Press Enter to send, Shift+Enter for new line)")
         
         if user_input:
@@ -213,7 +213,7 @@ with st.container():
                 response = get_gemini_response(prompt=user_input, files=uploaded_files)
                 st.session_state['last_response'] = response
 
-            # Prepare user message with file info
+            
             user_message = user_input
             if uploaded_files:
                 file_names = [file.name for file in uploaded_files]
@@ -240,8 +240,7 @@ with st.container():
                 display_chat_message(user_msg[0], user_msg[1], is_user=True)
                 display_chat_message("🤖", bot_msg[1], is_user=False)
                 
-                st.markdown("---")  # Horizontal line between each interaction
-
+                st.markdown("---")  
 # Sidebar for control buttons
 with st.sidebar:
     st.markdown("### 🛠️ Chat Controls")
@@ -261,7 +260,7 @@ with st.sidebar:
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Add some helpful info
+    
     st.markdown("---")
     st.markdown("### ℹ️ Quick Tips")
     st.markdown("""
@@ -271,7 +270,7 @@ with st.sidebar:
     - **File limits**: Check file size limits for uploads
     """)
 
-# Enhanced bottom note with better styling
+
 st.markdown("""<div class="bottom-note"
     <strong>🔒 Privacy Notice:</strong> This is a temporary chat session—your conversation history won't be saved to protect your privacy. 
     Want to keep your chat? Hit 'Download Chat History' before you refresh and lose it all.
