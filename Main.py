@@ -11,9 +11,11 @@ from PIL import Image
 # Load environment variables
 load_dotenv()
 
+GEMINI_API_KEY = st.secrets["GOOGLE_API_KEY"]
+
 # Configure Gemini model
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-2.0-flash")
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
 chat = model.start_chat(history=[])
 
 # CSS Loading Function
