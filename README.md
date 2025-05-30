@@ -48,15 +48,6 @@ A privacy-focused, intelligent chatbot powered by Google's Gemini AI with multi-
 
 5. **Open your browser** to `http://localhost:8501`
 
-## 📦 Dependencies
-
-```
-streamlit>=1.28.0
-python-dotenv>=1.0.0
-reportlab>=4.0.0
-google-generativeai>=0.3.0
-```
-
 ## 🖥️ Usage
 
 ### Basic Chat
