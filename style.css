@@ -77,3 +77,21 @@
         box-sizing: border-box;
     }
 }
+
+.bottom-note {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #2e2e2e;
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 13px;
+        max-width: 90%;
+        text-align: center;
+        border: 1px solid #555;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+        line-height: 1.5;
+    }
