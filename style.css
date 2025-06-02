@@ -95,3 +95,52 @@
         z-index: 9999;
         line-height: 1.5;
     }
+/* General Page Style */
+body {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Centered Heading */
+h1 {
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.chat-message {
+    background-color: #2e2a42;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #28832b;
+}
+.bot {
+    background-color: #2e2a42;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #455ce0;
+}
+.h4{
+    color: white !important;
+    font-size: 16px;
+
+}
+
+/* User vs Bot Coloring */
+div:has(> b:contains("You:")) {
+    border-left-color: #388156;
+}
+
+div:has(> b:contains("🤖:")) {
+    border-left-color: #455d76;
+}
