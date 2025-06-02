@@ -18,20 +18,23 @@
     }
 
     .bottom-note {
-        font-size: 13px;
-        padding: 12px 18px;
-        max-width: 90%;
-        bottom: 12px;
+        position: fixed;
+        bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: #2a2a2a;
-        color: #eeeeee;
-        border: 1px solid #444;
-        border-radius: 10px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+        background-color: #2e2e2e;
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 13px;
+        max-width: 90%;
         text-align: center;
-        z-index: 1000;
+        border: 1px solid #555;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+        line-height: 1.5;
     }
+
 
 
     .bottom-buttons button {
