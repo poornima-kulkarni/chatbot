@@ -7,19 +7,19 @@
     }
 
     h1 {
-        font-size: 12px;
+        font-size: 10px;
         margin: 15px 0;
     }
 
     .chat-message,
     .bot {
         padding: 6px;
-        font-size: 14px;
+        font-size: 10px;
     }
 
     .bottom-note {
         position: fixed;
-        bottom: 20px;
+        bottom: 10px;
         left: 50%;
         transform: translateX(-50%);
         background-color: #2e2e2e;
