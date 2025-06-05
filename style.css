@@ -2,18 +2,18 @@
 @media screen and (max-width: 768px) {
 
     body {
-        padding: 10px;
-        font-size: 16px;
+        padding: 5px;
+        font-size: 12px;
     }
 
     h1 {
-        font-size: 24px;
+        font-size: 12px;
         margin: 15px 0;
     }
 
     .chat-message,
     .bot {
-        padding: 12px;
+        padding: 6px;
         font-size: 14px;
     }
 
