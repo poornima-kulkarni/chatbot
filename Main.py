@@ -43,7 +43,7 @@ def display_chat_message(role, message, is_user=False):
 
 # Gemini response
 def generate_image_with_huggingface(prompt):
-    API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
+    API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
     headers = {
         "Authorization": f"Bearer {st.secrets['HF_API_KEY']}"
     }
