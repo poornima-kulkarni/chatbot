@@ -282,8 +282,9 @@ with st.sidebar:
     - All chat is temporary (ephemeral)
     """)
 
-st.markdown("""
-<div class="bottom-note">
-    <strong>🔒 Privacy Notice:</strong> Your chat is not stored. Download it before you refresh.
+st.markdown("""<div class="bottom-note"
+    <strong>🔒 Privacy Notice:</strong> This is a temporary chat session—your conversation history won't be saved to protect your privacy. 
+    Want to keep your chat? Hit 'Download Chat History' before you refresh and lose it all.
 </div>
 """, unsafe_allow_html=True)
+
