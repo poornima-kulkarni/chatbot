@@ -1,35 +1,39 @@
 from dotenv import load_dotenv
 import streamlit as st
 import os
-import google.generativeai as genai
 import io
+import requests
+import google.generativeai as genai
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.platypus import HRFlowable
 from PIL import Image
+from PIL import UnidentifiedImageError
 
 # Load environment variables
 load_dotenv()
 
+# API keys
 GEMINI_API_KEY = st.secrets["GOOGLE_API_KEY"]
+HF_API_KEY = st.secrets["HF_API_KEY"]
 
-# Configure Gemini model
+# Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
 chat = model.start_chat(history=[])
 
-# CSS Loading Function
+# Load CSS
 def load_css(file_name):
-    """Load CSS file and inject it into Streamlit"""
     try:
         with open(file_name) as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
-        st.warning(f"CSS file '{file_name}' not found. Using default styling.")
+        st.warning(f"CSS file '{file_name}' not found.")
 
-# Enhanced chat message display function
+# Display chat
 def display_chat_message(role, message, is_user=False):
-    """Display chat message with professional styling"""
     css_class = "user-message" if is_user else "bot-message"
     st.markdown(f"""
     <div class="chat-message {css_class} fade-in">
@@ -37,7 +41,7 @@ def display_chat_message(role, message, is_user=False):
     </div>
     """, unsafe_allow_html=True)
 
-# Gemini response function (handles text and files)
+# Gemini response
 def get_gemini_response(prompt=None, files=None):
     contents = []
     if prompt:
@@ -50,24 +54,19 @@ def get_gemini_response(prompt=None, files=None):
                 try:
                     image = Image.open(io.BytesIO(file_bytes))
                     contents.append(image)
-                except Exception as e:
-                    st.error(f"Error processing image: {e}")
+                except UnidentifiedImageError:
+                    st.error("Unsupported image format.")
             elif file_type == "application/pdf":
                 contents.append({"mime_type": "application/pdf", "data": file_bytes})
             elif "docx" in file_type:
                 try:
                     from docx import Document
                     doc = Document(io.BytesIO(file_bytes))
-                    full_text = []
-                    for para in doc.paragraphs:
-                        full_text.append(para.text)
+                    full_text = [para.text for para in doc.paragraphs]
                     contents.append("\n".join(full_text))
-                except ImportError:
-                    st.warning("docx library not found. Docx files will be treated as binary.")
-                    contents.append(file_bytes.decode('latin-1', errors='ignore')) # Basic decoding
                 except Exception as e:
-                    st.error(f"Error processing docx file: {e}")
-                    contents.append(file_bytes.decode('latin-1', errors='ignore')) # Basic decoding
+                    st.warning(f"docx error: {e}")
+                    contents.append(file_bytes.decode('latin-1', errors='ignore'))
             else:
                 st.warning(f"Unsupported file type: {file_type}")
 
@@ -76,31 +75,50 @@ def get_gemini_response(prompt=None, files=None):
     response = chat.send_message(contents, stream=True)
     return "".join([chunk.text for chunk in response])
 
-# Streamlit page config
-st.set_page_config(
-    page_title="Chatbot", 
-    page_icon=":robot:", 
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# Fetch Fal AI models
+def get_falai_text_to_image_models():
+    url = "https://huggingface.co/api/models"
+    params = {"inference_provider": "fal-ai", "pipeline_tag": "text-to-image"}
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        return [model["id"] for model in response.json()]
+    except Exception as e:
+        st.error(f"Failed to fetch Fal AI models: {e}")
+        return []
 
-# Load custom CSS
-load_css('style.css')
+# Generate image from text using selected model
+def generate_image_from_prompt(model_id, prompt):
+    url = f"https://api-inference.huggingface.co/models/{model_id}"
+    headers = {
+        "Authorization": f"Bearer {HF_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {"inputs": prompt}
 
-# Main title with enhanced styling
-st.markdown("""
-<h1 style='text-align: center; font-family: "Helvetica Neue", sans-serif;'>🤖 Ephemeral AI</h1>
-""", unsafe_allow_html=True)
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        if "image" in response.headers.get("content-type", ""):
+            return Image.open(io.BytesIO(response.content))
+        else:
+            st.error(f"Unexpected response: {response.text}")
+    except Exception as e:
+        st.error(f"Image generation failed: {e}")
+    return None
 
-# Session history initialization
+# Session state init
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
 if 'show_history' not in st.session_state:
     st.session_state['show_history'] = False
 if 'last_response' not in st.session_state:
     st.session_state['last_response'] = ""
+if 'falai_models' not in st.session_state:
+    st.session_state['falai_models'] = []
+if 'generated_image' not in st.session_state:
+    st.session_state['generated_image'] = None
 
-# Helper functions
 def toggle_history():
     st.session_state['show_history'] = not st.session_state['show_history']
 
@@ -112,167 +130,132 @@ def clear_chat_history():
     st.session_state['show_history'] = False
     st.rerun()
 
-# Main layout
+# UI Setup
+st.set_page_config(page_title="Chatbot", page_icon=":robot:", layout="wide", initial_sidebar_state="collapsed")
+load_css('style.css')
+
+st.markdown("""<h1 style='text-align: center;'>🤖 Ephemeral AI</h1>""", unsafe_allow_html=True)
+
 with st.container():
     col1, col2 = st.columns([6, 2])
 
+    # Sidebar Controls
     with col2:
         st.markdown("### 📊 Chat Controls")
-        
-        # History toggle button
-        if st.button("📜 Chat History", key="history_btn", help="Toggle chat history display"):
-            toggle_history()
-        
-        # Download options
-        download_format = st.selectbox(
-            "📁 Download Chat History", 
-            ["Select format", "Download as PDF", "Download as TXT"],
-            help="Choose format to download your chat history"
-        )
 
+        if st.button("📜 Chat History"):
+            toggle_history()
+
+        download_format = st.selectbox("📁 Download Chat History", ["Select format", "Download as PDF", "Download as TXT"])
         chat_text = "\n".join([f"{role}: {text}" for role, text in st.session_state['chat_history']])
 
-        # PDF Download
         if download_format == "Download as PDF":
             buffer = io.BytesIO()
             doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
             styles = getSampleStyleSheet()
+            html_style = ParagraphStyle(name="HTMLStyle", parent=styles["Normal"], fontName="Helvetica", fontSize=11, leading=14, alignment=TA_LEFT)
 
-            from reportlab.lib.styles import ParagraphStyle
-            from reportlab.lib.enums import TA_LEFT
-
-            # Custom style that supports HTML
-            html_style = ParagraphStyle(
-                name="HTMLStyle",
-                parent=styles["Normal"],
-                fontName="Helvetica",
-                fontSize=11,
-                leading=14,
-                alignment=TA_LEFT,
-            )
-            
             def markdown_to_html_bold(text):
                 import re
                 return re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
 
-            
-            processed_text = markdown_to_html_bold(chat_text)
-
-            
             story = []
-            for line in processed_text.split('\n'):
+            for line in markdown_to_html_bold(chat_text).split('\n'):
                 if line.strip():
                     if "You:" in line:
                         line = f'<font color="green">{line}</font>'
                     elif "🤖:" in line:
                         line = f'<font color="black">{line}</font>'
-                        from reportlab.platypus import HRFlowable
                         story.append(HRFlowable(width="100%", thickness=0.7, color="grey"))
                     story.append(Paragraph(line, html_style))
                 else:
                     story.append(Spacer(1, 12))
-
             doc.build(story)
             buffer.seek(0)
+            st.download_button("📄 Download PDF", buffer, file_name="chat_history.pdf", mime="application/pdf")
 
-            st.download_button(
-                label="📄 Download PDF",
-                data=buffer,
-                file_name="chat_history.pdf",
-                mime="application/pdf",
-                help="Download your chat history as a PDF file"
-            )
-
-        # TXT Download
         elif download_format == "Download as TXT":
             buffer = io.BytesIO(chat_text.encode("utf-8"))
-            st.download_button(
-                label="📄 Download TXT",
-                data=buffer,
-                file_name="chat_history.txt",
-                mime="text/plain",
-                help="Download your chat history as a text file"
-            )
-        
-        # File uploader
-        st.markdown(f"<div class='file'><b>File Upload:</b></div>", unsafe_allow_html=True)
-        uploaded_files = st.file_uploader(
-            "Upload files (images, PDFs, DOCX):", 
-            type=["png", "jpg", "jpeg", "pdf", "docx"], 
-            accept_multiple_files=True,
-            help="Upload images, PDFs, or Word documents to include in your conversation"
-        )
+            st.download_button("📄 Download TXT", buffer, file_name="chat_history.txt", mime="text/plain")
 
-    with col1:
-        st.markdown(f"<div class='h4'><b>Type your prompt here:</b></div>", unsafe_allow_html=True)
-        # input
-        user_input = st.chat_input("Type your message here... (Press Enter to send, Shift+Enter for new line)")
+        # Upload files
+        st.markdown("<div class='file'><b>File Upload:</b></div>", unsafe_allow_html=True)
+        uploaded_files = st.file_uploader("Upload files (images, PDFs, DOCX):", type=["png", "jpg", "jpeg", "pdf", "docx"], accept_multiple_files=True)
+
+        # Fal AI Model Integration
+        st.markdown("### 🎨 Generate Image with Fal AI")
+
+        if st.button("🔍 Fetch Fal AI Models"):
+            with st.spinner("Fetching models..."):
+                st.session_state['falai_models'] = get_falai_text_to_image_models()
         
+        if st.session_state['falai_models']:
+            selected_model = st.selectbox("🧠 Select Model", st.session_state['falai_models'])
+            text_prompt = st.text_input("📝 Enter image prompt:")
+            if st.button("🎨 Generate Image"):
+                with st.spinner("Generating image..."):
+                    image = generate_image_from_prompt(selected_model, text_prompt)
+                    if image:
+                        st.session_state['generated_image'] = image
+
+        if st.session_state['generated_image']:
+            st.image(st.session_state['generated_image'], caption="Generated Image", use_column_width=True)
+            img_buf = io.BytesIO()
+            st.session_state['generated_image'].save(img_buf, format="PNG")
+            st.download_button("📥 Download Image", img_buf.getvalue(), "generated_image.png", mime="image/png")
+
+    # Chatbot input + display
+    with col1:
+        st.markdown("<div class='h4'><b>Type your prompt here:</b></div>", unsafe_allow_html=True)
+        user_input = st.chat_input("Type your message here...")
+
         if user_input:
             with st.spinner("🤔 Thinking..."):
                 response = get_gemini_response(prompt=user_input, files=uploaded_files)
                 st.session_state['last_response'] = response
 
-            
-            user_message = user_input
+            user_msg = user_input
             if uploaded_files:
                 file_names = [file.name for file in uploaded_files]
-                user_message += f" (Uploaded: {', '.join(file_names)})"
+                user_msg += f" (Uploaded: {', '.join(file_names)})"
 
-            # Add to chat history
-            st.session_state['chat_history'].append(("You", user_message))
+            st.session_state['chat_history'].append(("You", user_msg))
             st.session_state['chat_history'].append(("🤖", st.session_state['last_response']))
-            
-            # Display current conversation with enhanced styling
-            st.markdown(f"<div class='chat-message'><b>You:</b> {user_message}</div>", unsafe_allow_html=True)
+
+            st.markdown(f"<div class='chat-message'><b>You:</b> {user_msg}</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='bot'><b>🤖:</b> {st.session_state['last_response']}</div>", unsafe_allow_html=True)
 
-        # Chat history display
         if st.session_state['show_history'] and st.session_state['chat_history']:
             st.markdown("---")
             st.markdown("### 📜 Chat History")
-            
             for i in range(0, len(st.session_state['chat_history']), 2):
                 user_msg = st.session_state['chat_history'][i]
                 bot_msg = st.session_state['chat_history'][i + 1] if i + 1 < len(st.session_state['chat_history']) else ("🤖", "")
-
-                # Use enhanced display function for history too
                 display_chat_message(user_msg[0], user_msg[1], is_user=True)
                 display_chat_message("🤖", bot_msg[1], is_user=False)
-                
-                st.markdown("---")  
-# Sidebar for control buttons
+                st.markdown("---")
+
+# Sidebar extras
 with st.sidebar:
     st.markdown("### 🛠️ Chat Controls")
-    
-    st.markdown("""
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-    """, unsafe_allow_html=True)
-    
-    # Clear response button
-    if st.button("🗑️ Clear Last Response", key="clear_response", help="Clear the last AI response"):
+    if st.button("🗑️ Clear Last Response"):
         clear_response()
         st.success("Last response cleared!")
-    
-    # Clear chat history button
-    if st.button("🗑️ Clear Chat History", key="clear_history", help="Clear entire chat history"):
+
+    if st.button("🗑️ Clear Chat History"):
         clear_chat_history()
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    
+
     st.markdown("---")
-    st.markdown("### ℹ️ Quick Tips")
+    st.markdown("### ℹ️ Tips")
     st.markdown("""
-    - **Upload files**: Images, PDFs, and Word docs are supported
-    - **Download history**: Save your conversations before refreshing
-    - **Privacy**: Your chats are temporary and not stored permanently
-    - **File limits**: Check file size limits for uploads
+    - Supports PDF, DOCX, and image uploads  
+    - Use Fal AI to turn text into images  
+    - Download chats or generated images  
+    - All chat is temporary (ephemeral)
     """)
 
-
-st.markdown("""<div class="bottom-note"
-    <strong>🔒 Privacy Notice:</strong> This is a temporary chat session—your conversation history won't be saved to protect your privacy. 
-    Want to keep your chat? Hit 'Download Chat History' before you refresh and lose it all.
+st.markdown("""
+<div class="bottom-note">
+    <strong>🔒 Privacy Notice:</strong> Your chat is not stored. Download it before you refresh.
 </div>
 """, unsafe_allow_html=True)
