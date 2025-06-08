@@ -210,27 +210,7 @@ with st.container():
         st.markdown("<div class='file'><b>File Upload:</b></div>", unsafe_allow_html=True)
         uploaded_files = st.file_uploader("Upload files (images, PDFs, DOCX):", type=["png", "jpg", "jpeg", "pdf", "docx"], accept_multiple_files=True)
 
-        # Fal AI Model Integration
-        st.markdown("### 🎨 Generate Image with Fal AI")
-
-        if st.button("🔍 Fetch Fal AI Models"):
-            with st.spinner("Fetching models..."):
-                st.session_state['falai_models'] = get_falai_text_to_image_models()
         
-        if st.session_state['falai_models']:
-            selected_model = st.selectbox("🧠 Select Model", st.session_state['falai_models'])
-            text_prompt = st.text_input("📝 Enter image prompt:")
-            if st.button("🎨 Generate Image"):
-                with st.spinner("Generating image..."):
-                    image = generate_image_from_prompt(selected_model, text_prompt)
-                    if image:
-                        st.session_state['generated_image'] = image
-
-        if st.session_state['generated_image']:
-            st.image(st.session_state['generated_image'], caption="Generated Image", use_column_width=True)
-            img_buf = io.BytesIO()
-            st.session_state['generated_image'].save(img_buf, format="PNG")
-            st.download_button("📥 Download Image", img_buf.getvalue(), "generated_image.png", mime="image/png")
 
     # Chatbot input + display
     with col1:
@@ -262,7 +242,27 @@ with st.container():
                 display_chat_message(user_msg[0], user_msg[1], is_user=True)
                 display_chat_message("🤖", bot_msg[1], is_user=False)
                 st.markdown("---")
+        # Fal AI Model Integration
+        st.markdown("### 🎨 Generate Image with Fal AI")
 
+        if st.button("🔍 Fetch Fal AI Models"):
+            with st.spinner("Fetching models..."):
+                st.session_state['falai_models'] = get_falai_text_to_image_models()
+        
+        if st.session_state['falai_models']:
+            selected_model = st.selectbox("🧠 Select Model", st.session_state['falai_models'])
+            text_prompt = st.text_input("📝 Enter image prompt:")
+            if st.button("🎨 Generate Image"):
+                with st.spinner("Generating image..."):
+                    image = generate_image_from_prompt(selected_model, text_prompt)
+                    if image:
+                        st.session_state['generated_image'] = image
+
+        if st.session_state['generated_image']:
+            st.image(st.session_state['generated_image'], caption="Generated Image", use_column_width=True)
+            img_buf = io.BytesIO()
+            st.session_state['generated_image'].save(img_buf, format="PNG")
+            st.download_button("📥 Download Image", img_buf.getvalue(), "generated_image.png", mime="image/png")
 # Sidebar extras
 with st.sidebar:
     st.markdown("### 🛠️ Chat Controls")
