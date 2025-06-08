@@ -251,7 +251,7 @@ with st.container():
         
         if st.session_state['falai_models']:
             selected_model = st.selectbox("🧠 Select Model", st.session_state['falai_models'])
-            text_prompt = st.chat_input("Type your message here...")
+            text_prompt = st.chat_input("Type your message here...", key="chat_input_1")
             if st.button("🎨 Generate Image"):
                 with st.spinner("Generating image..."):
                     image = generate_image_from_prompt(selected_model, text_prompt)
