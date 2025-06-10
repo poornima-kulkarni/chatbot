@@ -159,7 +159,7 @@ div:has(> b:contains("🤖:")) {
     border-radius: 10px;
 }
 .custom-image {
-    width: 30px;        
+    width: 100px;        
     height: auto;        
     border-radius: 10px; 
 }
