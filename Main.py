@@ -90,7 +90,8 @@ def get_gemini_response(prompt=None, files=None):
 
 # Image generation via Hugging Face
 def generate_image_with_huggingface(prompt):
-    model_id = "prompthero/openjourney"  # Reliable fallback
+    model_id = "stabilityai/stable-diffusion-2"
+
     url = f"https://api-inference.huggingface.co/models/{model_id}"
     headers = {
         "Authorization": f"Bearer {HF_API_KEY}",
