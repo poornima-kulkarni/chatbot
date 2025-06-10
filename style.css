@@ -76,6 +76,23 @@
         max-width: 100%;
         box-sizing: border-box;
     }
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    .custom-image {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block;
+        margin: 10px auto;
+        border-radius: 8px;
+    }
+
+    /* Ensure all containers fit on small screens */
+    * {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
 }
 
 .bottom-note {
@@ -159,7 +176,7 @@ div:has(> b:contains("🤖:")) {
     border-radius: 10px;
 }
 .custom-image {
-    width: 300px;        
+    width: 500px;        
     height: auto;        
     border-radius: 10px; 
 }
