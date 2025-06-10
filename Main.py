@@ -90,7 +90,7 @@ def get_gemini_response(prompt=None, files=None):
 
 # Image generation via Hugging Face
 def generate_image_with_huggingface(prompt):
-    model_id = "stabilityai/stable-diffusion-2-1"
+    model_id = "runwayml/stable-diffusion-v1-5"
 
     url = f"https://api-inference.huggingface.co/models/{model_id}"
     headers = {
