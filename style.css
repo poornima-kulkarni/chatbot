@@ -143,4 +143,18 @@ div:has(> b:contains("You:")) {
 
 div:has(> b:contains("🤖:")) {
     border-left-color: #455d76;
+
+}
+.responsive-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.fixed-size-image {
+    width: 400px;
+    height: auto;
+    border: 2px solid #ccc;
+    border-radius: 10px;
 }
