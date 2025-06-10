@@ -146,15 +146,15 @@ div:has(> b:contains("🤖:")) {
 
 }
 .responsive-image {
-    max-width: 100%;
-    height: auto;
+    max-width: 50px;
+    height: 50px;
     border-radius: 8px;
     margin-top: 15px;
 }
 
 .fixed-size-image {
-    width: 400px;
-    height: auto;
+    width: 50px;
+    height: 50px;
     border: 2px solid #ccc;
     border-radius: 10px;
 }
