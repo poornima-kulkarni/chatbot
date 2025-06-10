@@ -221,6 +221,7 @@ with st.container():
 
         import base64
 
+        # Helper function to convert image to base64
         def image_to_base64(img):
             buf = io.BytesIO()
             img.save(buf, format="PNG")
@@ -228,14 +229,21 @@ with st.container():
 
         if st.session_state['generated_image']:
             base64_img = image_to_base64(st.session_state['generated_image'])
+
+            # Render image using custom CSS class
             st.markdown(
                 f'<img src="data:image/png;base64,{base64_img}" class="custom-image">',
                 unsafe_allow_html=True
             )
 
-            img_buf = io.BytesIO()
-            st.session_state['generated_image'].save(img_buf, format="PNG")
-            st.download_button("📥 Download Image", img_buf.getvalue(), "generated_image.png", mime="image/png")
+            # Optional download button
+            st.download_button(
+                "📥 Download Image",
+                data=base64.b64decode(base64_img),
+                file_name="generated_image.png",
+                mime="image/png"
+            )
+
 
 # Sidebar
 with st.sidebar:
@@ -257,7 +265,7 @@ with st.sidebar:
     """)
 
 st.markdown("""<div class="bottom-note"
-    <strong>🔒 Privacy Notice:</strong> This is a temporary chat session—your conversation history won't be saved. 
-    Download it before refreshing.
+    <strong>🔒 Privacy Notice:</strong> This is a temporary chat session—your conversation history won't be saved to protect your privacy. 
+    Want to keep your chat? Hit 'Download Chat History' before you refresh and lose it all.
 </div>
 """, unsafe_allow_html=True)
