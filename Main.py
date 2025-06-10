@@ -244,13 +244,17 @@ with st.container():
                 st.markdown("---")
         # Fal AI Model Integration
         st.markdown("### 🎨 Generate Image with Fal AI")
-
-        if st.button("🔍 Fetch Fal AI Models"):
-            with st.spinner("Fetching models..."):
-                st.session_state['falai_models'] = get_falai_text_to_image_models()
         
-        if st.session_state['falai_models']:
-            selected_model = st.selectbox("🧠 Select Model", st.session_state['falai_models'])
+        # reliable Fal AI model
+        selected_model = "stabilityai/stable-diffusion-2-1"  # Adjust if needed
+        st.markdown(f"🧠 Using model: `{selected_model}`")
+        text_prompt = st.chat_input("Type your image prompt here...", key="chat_input_1")
+        if st.button("🎨 Generate Image"):
+            with st.spinner("Generating image..."):
+                image = generate_image_from_prompt(selected_model, text_prompt)
+                if image:
+                    st.session_state['generated_image'] = image
+
             text_prompt = st.chat_input("Type your message here...", key="chat_input_1")
             if st.button("🎨 Generate Image"):
                 with st.spinner("Generating image..."):
