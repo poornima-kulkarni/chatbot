@@ -220,7 +220,7 @@ with st.container():
                     st.error(image)
 
         if st.session_state['generated_image']:
-            st.image(st.session_state['generated_image'], caption="Generated Image", use_column_width=True)
+            st.image(st.session_state['generated_image'], caption="Generated Image", use_container_width=True)
             img_buf = io.BytesIO()
             st.session_state['generated_image'].save(img_buf, format="PNG")
             st.download_button("📥 Download Image", img_buf.getvalue(), "generated_image.png", mime="image/png")
