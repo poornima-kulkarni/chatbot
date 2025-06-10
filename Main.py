@@ -219,8 +219,20 @@ with st.container():
                 else:
                     st.error(image)
 
+        import base64
+
+        def image_to_base64(img):
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            return base64.b64encode(buf.getvalue()).decode()
+
         if st.session_state['generated_image']:
-            st.image(st.session_state['generated_image'], caption="Generated Image")
+            base64_img = image_to_base64(st.session_state['generated_image'])
+            st.markdown(
+                f'<img src="data:image/png;base64,{base64_img}" class="custom-image">',
+                unsafe_allow_html=True
+            )
+
             img_buf = io.BytesIO()
             st.session_state['generated_image'].save(img_buf, format="PNG")
             st.download_button("📥 Download Image", img_buf.getvalue(), "generated_image.png", mime="image/png")
