@@ -32,6 +32,8 @@ def load_css(file_name):
 
 # Display chat
 def display_chat_message(role, message, is_user=False):
+    import html
+    message = html.escape(message)  # Escape raw HTML tags
     css_class = "user-message" if is_user else "bot-message"
     st.markdown(f"""
     <div class="chat-message {css_class} fade-in">
