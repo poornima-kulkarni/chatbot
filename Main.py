@@ -264,7 +264,7 @@ with st.sidebar:
     - All data is ephemeral (temporary)
     """)
 
-st.markdown("""<div class="bottom-note"
+st.markdown("""<div class="bottom-note">
     <strong>🔒 Privacy Notice:</strong> This is a temporary chat session—your conversation history won't be saved to protect your privacy. 
     Want to keep your chat? Hit 'Download Chat History' before you refresh and lose it all.
 </div>
