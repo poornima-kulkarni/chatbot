@@ -49,10 +49,10 @@ def display_chat_message(role, message, is_user=False):
 def generate_image_with_replicate(prompt):
     try:
         os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_KEY
-        output = replicate.run(
-    "stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc",
-    input=prompt
+        output = replicate.run("stability-ai/sdxl:db21e45e12b4c9e7ac0f72f8ef3cf9dfae3f28cf8485b3c91b50a2a2b5b8f40d",
+    input={"prompt": "a fantasy landscape with mountains", "width": 512, "height": 512}
 )
+
         if isinstance(output, list) and output:
             image_url = output[0]
             image_data = requests.get(image_url).content
