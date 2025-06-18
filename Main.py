@@ -83,6 +83,9 @@ def get_gemini_response(prompt=None, files=None):
 
 # Hugging Face image generation
 def generate_image_with_huggingface(prompt):
+    if not prompt or not prompt.strip():
+        return "⚠️ Please enter a valid prompt."
+
     model_id = "stabilityai/stable-diffusion-xl-base-1.0"
     url = f"https://api-inference.huggingface.co/models/{model_id}"
     headers = {
@@ -90,11 +93,20 @@ def generate_image_with_huggingface(prompt):
         "Content-Type": "application/json"
     }
     payload = {"inputs": prompt}
-    response = requests.post(url, headers=headers, json=payload)
-    response.raise_for_status()
-    if "image" in response.headers.get("content-type", ""):
-        return Image.open(io.BytesIO(response.content))
-    return f"Unexpected response: {response.text}"
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+
+        if "image" in response.headers.get("content-type", ""):
+            return Image.open(io.BytesIO(response.content))
+        else:
+            return f"⚠️ Hugging Face returned non-image content: {response.text}"
+
+    except requests.exceptions.HTTPError as e:
+        return f"❌ HTTPError: {e.response.status_code} - {e.response.reason}\n{e.response.text}"
+    except Exception as e:
+        return f"❌ Unexpected Error: {str(e)}"
 
 # Session state init
 for key in ["chat_history", "show_history", "last_response", "generated_image"]:
