@@ -46,13 +46,14 @@ def display_chat_message(role, message, is_user=False):
     st.markdown(f"<div class='chat-message {css_class} fade-in'><b>{role}:</b> {message}</div>", unsafe_allow_html=True)
 
 # Replicate image generation
+# Replicate image generation (fixed)
 def generate_image_with_replicate(prompt):
     try:
         os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_KEY
         output = replicate.run(
-    "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
-    input=prompt
-)
+            "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
+            input={"prompt": prompt}
+        )
         if isinstance(output, list) and output:
             image_url = output[0]
             image_data = requests.get(image_url).content
@@ -61,6 +62,7 @@ def generate_image_with_replicate(prompt):
             return "⚠️ No image was returned from Replicate."
     except Exception as e:
         return f"❌ Error using Replicate: {str(e)}"
+
 
 # Gemini response with file handling
 def get_gemini_response(prompt=None, files=None):
