@@ -51,7 +51,7 @@ def generate_image_with_replicate(prompt):
         os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_KEY
         output = replicate.run(
     "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
-    input=input
+    input=prompt
 )
         if isinstance(output, list) and output:
             image_url = output[0]
