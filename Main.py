@@ -2,15 +2,13 @@ from dotenv import load_dotenv
 import streamlit as st
 import os
 import io
-import requests
-import replicate
 import google.generativeai as genai
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
 from PIL import Image
-import base64
+
 
 # Load environment variables
 load_dotenv()
