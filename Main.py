@@ -15,11 +15,11 @@ load_dotenv()
 
 # API keys
 GEMINI_API_KEY = st.secrets["GOOGLE_API_KEY"]
-REPLICATE_API_KEY = st.secrets["REPLICATE_IMAGE_GEN_API"]
+
 
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.0-flash")
 chat = model.start_chat(history=[])
 
 # Load CSS
