@@ -19,7 +19,7 @@ GEMINI_API_KEY = st.secrets["GOOGLE_API_KEY"]
 
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 chat = model.start_chat(history=[])
 
 # Load CSS
